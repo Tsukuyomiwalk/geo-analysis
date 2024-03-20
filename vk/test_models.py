@@ -1,4 +1,3 @@
-import pickle
 
 import numpy as np
 import pandas as pd
@@ -8,12 +7,12 @@ from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.model_selection import GridSearchCV
-from joblib import Parallel, delayed
+from joblib import Parallel, delayed, dump
 from catboost import CatBoostRegressor
 from sklearn.ensemble import StackingRegressor
 
 
-def preprocessing_data(train_df, test_df, features_df):
+def filter_data(train_df, test_df, features_df):
     step = 2.5
     features_df_copy = features_df.copy()
     features_df_copy['lat_with_step'] = (features_df_copy['lat'] // step) * step
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     test_df = pd.read_csv("datasets/test.csv")
     features_df = pd.read_csv("datasets/features.csv")
 
-    train_processed, test_processed = preprocessing_data(train_df, test_df, features_df)
+    train_processed, test_processed = filter_data(train_df, test_df, features_df)
 
     train_merged = pd.merge(train_df, features_df, on=['lat', 'lon'], how='left')
     test_merged = pd.merge(test_df, features_df, on=['lat', 'lon'], how='left')
@@ -87,5 +86,5 @@ if __name__ == "__main__":
             best_mae = mae
             best_model = results[maes.index(mae)]
 
-    pickle.dump(best_model, open('best_model.sav', 'wb'))
-    pickle.dump(selector, open('selector.sav', 'wb'))
+    dump(best_model, open('best_model.sav', 'wb'))
+    dump(selector, open('selector.sav', 'wb'))
